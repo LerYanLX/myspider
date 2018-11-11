@@ -1,4 +1,9 @@
-﻿#coding=utf-8
+﻿"""
+  作者：wanderees
+  时间： 2018-7-29
+  注：amazon对爬取进行了限制，爬不完全部就会被BAN。可添加代理IP池进行爬取。
+"""
+#coding=utf-8
 import re
 import requests
 from urllib import request
@@ -10,7 +15,7 @@ import chardet
 from html.parser import HTMLParser
 
 #'https://www.amazon.cn/s/ref=lp_116087071_pg_2?rh=n%3A116087071&page=2&ie=UTF8&qid=1534933293'
-def Get_content(url):
+def Get_content(url):         #获得网页源码
     headers = {
         'Accept-Encoding': 'gzip, deflate, sdch, br',
         'User-Agent': 'Mozilla/5.0 (Windows NT 6.3; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36',
@@ -30,7 +35,7 @@ def Get_content(url):
     soup = BeautifulSoup(r.text, 'html.parser')
     return soup
 
-def Get_book_url(url_list):
+def Get_book_url(url_list):          #获得图书的URL列表
     href_list = []
     for url in url_list:
         soup = Get_content(url)
@@ -41,7 +46,7 @@ def Get_book_url(url_list):
         href_list.append(href)
     return href
 
-def Get_price(url_list):
+def Get_price(url_list):        #获得图书价格
     title_list = []
     price_list = []
     jinzhuang_list = []
@@ -55,12 +60,12 @@ def Get_price(url_list):
         price_all = content.find(name='ul', attrs={'class': 'a-unordered-list a-nostyle a-button-list a-horizontal'}).get_text()
         price_content = str(price_all).replace('\n','').replace('\r','').replace('\t','')
         print(price_content)
-        if "平装" in str(price_content):
+        if "平装" in str(price_content):          #判断有无平装价格，没有就添加nothong
             pinzhuang_price = re.findall(r'.+?平装.+?(￥\d+.\d+).+?', price_content, re.S)
             pinzhuang_list.append(pinzhuang_price)
-        elif "平装" not in str(price_content):
+        elif "平装" not in str(price_content):     
             pinzhuang_list.append('Nothing')
-        if "精装" in str(price_content):
+        if "精装" in str(price_content):     #判断有无精装价格，没有就添加nothing
             jinzhuang_price = re.findall(r'.+?精装.+?(￥\d+.\d+).+?', price_content, re.S)
             jinzhuang_list.append(jinzhuang_price)
         elif "精装" not in str(price_content):
@@ -73,7 +78,7 @@ def Get_price(url_list):
 url_list = []
 url = 'https://www.amazon.cn/s/ref=lp_116087071_pg_2?rh=n%3A116087071&page=2&ie=UTF8&qid=1534933293'
 x = list(url)
-for page in range(2,401):
+for page in range(2,401):     #总共400页，但是由于亚马逊的反爬机制，一个只能爬几十页就会被BAN,添加代理IP池即可解决这种情况。
     x[-24] = '%s' % page
     x[44] = '%s' % page
     list1 = ''.join(x)
